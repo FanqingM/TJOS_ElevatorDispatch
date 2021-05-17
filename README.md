@@ -1,7 +1,7 @@
 # TJOS_ElevatorDispatch
 The first homework for OS
 
-[可以预览](https://fanqingm.github.io/Tongji_OS_ElevatorDispatch/dist/)
+[可以预览](https://fanqingm.github.io/TJOS_ElevatorDispatch/dist/)
 
 **由于时间仓促。（基本算写了两天吧），还不完善**
 
