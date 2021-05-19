@@ -3,7 +3,7 @@ The first homework for OS
 
 [可以预览](https://fanqingm.github.io/TJOS_ElevatorDispatch/dist/)
 
-**由于时间仓促。（基本算写了两天吧），还不完善，但不改了没时间**
+**忘了放图床了。图片看不到**
 
 # 进程管理 - 电梯调度_设计方案报告
 
