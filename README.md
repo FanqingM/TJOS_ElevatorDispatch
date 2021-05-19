@@ -80,6 +80,13 @@ The first homework for OS
 
   <img src="/Users/fanqing_m/Library/Application Support/typora-user-images/image-20210517225610250.png" alt="image-20210517225610250" style="zoom:50%;" />
   
+- 电梯维修
+  
+  - 点击红色警报键，此时电梯会禁用，即发生故障，电梯内按钮失效，并且外调度中排除此电梯
+  - 点击绿色按钮，如果电梯正常则无效，否则，将电梯送入维修，一定时间后回到初始状态。
+  
+  <img src="/Users/fanqing_m/Library/Application Support/typora-user-images/image-20210520001057150.png" alt="image-20210520001057150" style="zoom:20%;" /><img src="/Users/fanqing_m/Library/Application Support/typora-user-images/image-20210520001209133.png" alt="image-20210520001209133" style="zoom:30%;" />
+  
 - 运行截图
 
   <img src="/Users/fanqing_m/Library/Application Support/typora-user-images/image-20210517225731004.png" alt="image-20210517225731004" style="zoom:50%;" />
@@ -101,6 +108,7 @@ The first homework for OS
 | aimFloor     | Number       | 当前电梯目标楼层                                 |
 | isGoingUp    | Boolen       | 为0:电梯静止；为1:电梯上升；为-1:电梯下降        |
 | isSelect     | Boolen Array | 电梯消息队列（包括电梯内部和电梯外部请求）       |
+| isOk         | Boolen       | 电梯是否可用                                     |
 
 **这里的aimFloor，当电梯上升时是消息队列中最大楼层；当电梯下降时是消息队列中最小楼层**
 
@@ -108,7 +116,7 @@ The first homework for OS
 
 ### 电梯状态转化
 
-<img src="/Users/fanqing_m/Library/Application Support/typora-user-images/image-20210517233915233.png" alt="image-20210517233915233" style="zoom:50%;" />
+![image-20210520002326885](/Users/fanqing_m/Library/Application Support/typora-user-images/image-20210520002326885.png)
 
 
 
@@ -126,6 +134,10 @@ The first homework for OS
     3. 用户点击*报警器*
     
   - **预期响应:**
+    
+    **若用户点击禁用电梯，则发出警报，并没有动作**
+    
+    **若用户点击可用电梯**
     
     **若用户点击的正是当前楼层**
     
@@ -203,10 +215,18 @@ The first homework for OS
 
      若某电梯当前处于静止状态 => "可调度性"定义为(|该电梯当前楼层 - 用户楼层|)
 
-  3. 选择可调度性最好的作为最佳电梯
+  3. **选择可调度性最好的并且可用的最好作为最佳电梯**
 
-     1. 若最佳电梯当前就在用户选择的楼层 => 该电梯开门(并等待用户自行关闭)
-       2. 否则 => 将用户楼层信息加入该最佳电梯的消息队列中
+     - 若存在可用的电梯
+       - 若最佳电梯当前就在用户选择的楼层 => 该电梯开门(并等待用户自行关闭)
+       - 否则 => 将用户楼层信息加入该最佳电梯的消息队列中
+
+     - 若不存在可用的电梯
+       - 则发出警报，无可用电梯，并且无后续动作。
+
+     
+
+     
 
 <a name="作者"></a>  
 
@@ -219,5 +239,4 @@ The first homework for OS
 | 上课时间    | 周三，周五/早一二                                 |
 | 联系方式    | 1950679@tongji.edu.cn                             |
 | github repo | https://github.com/FanqingM/TJOS_ElevatorDispatch |
-
 
