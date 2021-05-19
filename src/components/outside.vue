@@ -34,12 +34,27 @@
         },
         methods: {
             handleUpClick() {
-                console.log("我这一层向上请求支援",this.floorId);
-                this.$emit("outsideCallFloorUp", this.floorId)
+                
+                if(this.floorId < 20)
+                {
+                    console.log("我这一层向上请求支援",this.floorId);
+                    this.$emit("outsideCallFloorUp", this.floorId)
+                }
+                else
+                {
+                    alert("您已经到顶了啦🆘")
+                }
             },
             handleDownClick() {
-                console.log("我这一层向下请求支援",this.floorId);
-                this.$emit("outsideCallFloorDown", this.floorId)
+                if(this.floorId > 1)
+                {
+                    console.log("我这一层向下请求支援",this.floorId);
+                    this.$emit("outsideCallFloorDown", this.floorId);
+                }
+                else
+                {
+                    alert("您已经到底了啦🆘")
+                }
             },
         }
     }

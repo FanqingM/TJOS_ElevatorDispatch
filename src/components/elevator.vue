@@ -4,7 +4,7 @@
   <!-- 所以我们在update那里做了点处理 -->
   <!-- 还有点击后的css样式没搞好 -->
   <div id="lay">
-    <el-card class="box-card">
+    <el-card class="box-card" :class="{boxMap: isOk === false}">
       <el-card :class="{map1:isGoingUp===0, map2:!(isGoingUp===0)}" shadow="always">
         <div>
           <i class="el-icon-caret-top" v-show="this.isGoingUp===1"></i>
@@ -17,7 +17,7 @@
       </el-card>
       <div class="button-group">
         <div v-for="i in this.floorCount" :key="i" class="button-place">
-        <el-button type="primary" :class="{button:buttonClicked[i-1] === false, button2:buttonClicked[i-1] === true}" @click="handleInsideButtonClick(i)">
+        <el-button type="primary" :class="{button:buttonClicked[i-1] === false , button2:buttonClicked[i-1] === true } " @click="handleInsideButtonClick(i)">
             {{ i }}
           </el-button>
         </div>
@@ -65,7 +65,7 @@
         isSelect: [...Array(20)].map(() => false),
         timer: null,    // 内部请求队列
         cnt: 0,
-        selfColor:[{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'},{backgroundColor:'hsl(220, 8%, 93%)'}],
+        isOk: true,
       //   selfcolor: {
       //       backgroundColor:'hsl(220, 8%, 93%)',
       //   },
@@ -74,11 +74,33 @@
     methods: {
       askForCommunicate()
       {
-        alert("请求与电梯管理员通话☎️");
-      },
-      askForHelp()
-      {
-        alert("请求电梯管理员援助🔥")
+        if(this.isOk === true)
+        {
+          alert("现在电梯是好的，维修个🔨");
+        }
+        else 
+        {
+          alert("请求与电梯管理员通话🆘,快点维修电梯啊啊啊");
+          this.msg = "维修中";
+          setTimeout(() => {   //设置延迟执行
+            //维修好了，我们让他回到初始状态
+            this.isOk = true;
+            this.msg = "空闲中";
+            this.currentFloor = 0;
+            this.isOpen = false;
+            this.aimFloor = 0;
+            this.isGoingUp = 0;
+            this.timer = null;
+            this.cnt = 0;
+            for(let i=0;i<20;i++)
+            {
+              this.$set(this.isSelect, i, false);
+              this.$set(this.buttonClicked, i, false);
+            }
+          }, 3000);
+          //然后要让他继续进行原来的活动
+          this.updateStateToFather();
+        }
       },
       isEmpty() {
         for (let i = 0; i < 20; i++) {
@@ -97,7 +119,20 @@
               this.currentFloor,
               this.isGoingUp,
               this.aimFloor,
+              this.isOk
           )
+      },
+      askForHelp()
+      {
+        alert("请求电梯管理员援助🔥");
+        //但是我们还是保存了原来的任务并没有清空
+        this.isOk = false;
+        this.isGoingUp = 0;
+        this.isOpen = false;
+        this.updateStateToFather()
+        setTimeout(() => {   //设置延迟执行
+          this.msg="电梯故障，不能使用🆘";
+        }, 1000);
       },
       openDoor() {
         this.isOpen = true;
@@ -128,15 +163,23 @@
         //第一种情况是电梯上升或者下降中途停下，继续run，并且goingup维持原来
         //第二种情况是电梯上升或者下降到了aimFloor了，队列里面没东西了，就隔着听着，直接goingup为0，不run了
         //第三种情况是电梯上升到了aimFloor，但是还有下面楼层需要响应，改goingup再update在run
-        if (this.isEmpty()) {
-          this.msg = "空闲中";
-          this.isGoingUp = 0;
-          this.cnt = 0;
-          //this.cnt = 0;
-        }
-        else {
-          this.msg = "忙碌中";
-          setTimeout(this.run, 1000);
+        if(this.isOk)
+        {
+            if (this.isEmpty()) {
+            this.msg = "空闲中";
+            this.isGoingUp = 0;
+            this.cnt = 0;
+            //this.cnt = 0;
+            for(var i = 0;i<20;i++)
+            {
+              this.$set(this.isSelect, i, false);
+              this.$set(this.buttonClicked,i,false);
+            }
+          }
+            else {
+              this.msg = "忙碌中";
+              setTimeout(this.run, 1000);
+            }
         }
 
       },
@@ -196,29 +239,53 @@
           //这里收到的pressFloor是父组件传过来的
           console.log("父组件触发我了,我是电梯(从1开始）", this.elevatorId)
           console.log("现在按下第几层？", pressFloor)
-          this.isSelect[pressFloor] = true;
-          this.updateState();
-          if (this.cnt < 1) {
-              //这里与内部点击处理是相同的
-          this.run();
+          if(pressFloor == this.currentFloor)
+          {
+            this.isOpen = true;
+            setTimeout(() => {   //设置延迟执行
+          this.isOpen = false;
+        }, 3000);
+          }
+          else 
+          {
+            this.isSelect[pressFloor] = true;
+            this.updateState();
+            if (this.cnt < 1) {
+                //这里与内部点击处理是相同的
+            this.run();
+          }
         }
       },
       handleInsideButtonClick(floor) {
         //先改数组信息
-        this.$set(this.buttonClicked, floor - 1, true);
-        console.log("内部队列我康康  ", this.isSelect);
-        console.log("当前点击楼层（从1开始） " + floor);
-        this.$set(this.isSelect, floor - 1, true);
-        this.updateState(floor);
-        this.updateStateToFather();
-        //再进行run的逻辑
-        console.log("当前电梯目标楼层  " + this.aimFloor);
-        console.log("当前电梯状态 " + this.isGoingUp);
-        if (this.cnt < 1) {
-          //我们一个电梯只创建一个运行活动，不然计时器会冲突
-          //但是我们当电梯停下来时就等价与进入初始状态，会把cnt重新为0
-          console.log("cnt  " + this.cnt);
-          this.run();
+        if(this.isOk)
+        {
+            if(floor-1 == this.currentFloor)
+            {
+              this.isOpen = true;
+            }
+            else 
+            {
+              this.$set(this.buttonClicked, floor - 1, true);
+              console.log("内部队列我康康  ", this.isSelect);
+              console.log("当前点击楼层（从1开始） " + floor);
+              this.$set(this.isSelect, floor - 1, true);
+              this.updateState(floor);
+              this.updateStateToFather();
+              //再进行run的逻辑
+              console.log("当前电梯目标楼层  " + this.aimFloor);
+              console.log("当前电梯状态 " + this.isGoingUp);
+              if (this.cnt < 1) {
+                //我们一个电梯只创建一个运行活动，不然计时器会冲突
+                //但是我们当电梯停下来时就等价与进入初始状态，会把cnt重新为0
+                console.log("cnt  " + this.cnt);
+                this.run();
+                }
+            } 
+        }
+        else
+        {
+          alert("这个电梯已经坏了，不要点⚠️");
         }
       },
       //先下后上有问题
@@ -369,12 +436,16 @@
     clear: both
   }
 
-  .box-card {
+  #lay .box-card {
     width: 340px;
     height: 750px;
     padding: 10px;
+    /* background: linear-gradient(to bottom left, #EF8D9C 40%, #FFC39E 100%); */
   }
-
+  #lay .boxMap
+  {
+    background: linear-gradient(to bottom left, #EF8D9C 40%, #FFC39E 100%);
+  }
   .control {
     display: flex;
     justify-content: space-around;

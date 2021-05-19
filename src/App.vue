@@ -46,6 +46,8 @@
       return {
         elevatorNum: 5,
         floorCount: 20,
+        isAllNotOk: false,
+        elevatorIsOK: [...Array(5)].map(() => true),
         cost: [...Array(5)].map(() => 0),
         aimFloor: [...Array(5)].map(() => 0),
         goingUp: [...Array(5)].map(() => 0),              //每个电梯的状态，1代表上升，-1代表下降，0代表禁止
@@ -132,12 +134,30 @@
           }
         }
         //以上是初始化cost数组，下面求出最小的
-        var min = this.cost[0];
-        var min_id = 0;
-        for (let i = 0; i < 5; i++) {
-          if (this.cost[i] < min) {
+        //注意这里最小的是在没有故障的电梯中找的
+        
+        var min;
+        var min_id;
+        for(let i=0;i<5;i++)
+        {
+          if(this.elevatorIsOK[i] === true)
+          {
             min = this.cost[i];
             min_id = i;
+            break;
+          }
+        }
+        for (let i = 0; i < 5; i++) {
+          if(this.elevatorIsOK[i] === false)
+          {
+            continue;
+          }
+          else 
+          {
+              if (this.cost[i] < min) {
+              min = this.cost[i];
+              min_id = i;
+            }
           }
         }
         this.CallElevatorId = min_id;
@@ -148,26 +168,56 @@
         elevator_currentFloor,
         elevator_isGoingUp,
         elevator_aimFloor,
+        elevator_isOk,
       ) {
+        //this.isOk[elevator_id - 1] = elevator_isOk;
         //有个问题currentFloor没有实时更新，所以我们在elevator里面currentfloor变也需要上报父组件
+        var i = 0;
+        this.elevatorIsOK[elevator_id - 1] = elevator_isOk;
         this.currentFloor[elevator_id - 1] = elevator_currentFloor;
         //有个问题goingUp在停下来的时候没有变零
         this.goingUp[elevator_id - 1] = elevator_isGoingUp;
         this.aimFloor[elevator_id - 1] = elevator_aimFloor;
+        for(i=0;i<5;i++)
+        {
+          if(this.elevatorIsOK[i])
+          {
+            break;
+          }
+        }
+        if(i==5)
+        {
+          this.isAllNotOk = true;
+        }
       },
       callUpHelp(floor_id) {
-        //我们希望这个也从零开始，这样计算方便
-        this.pressFloor = floor_id - 1;
-        this.isUp = true;
-        //下面经过计算函数，把这个需求分配给某一个电梯，即加入这个电梯的isselect
-        this.calculateCallElevatorId()
-        this.insertToElevator();
+        if(this.isAllNotOk === false)
+        {
+          //我们希望这个也从零开始，这样计算方便
+          this.pressFloor = floor_id - 1;
+          this.isUp = true;
+          //下面经过计算函数，把这个需求分配给某一个电梯，即加入这个电梯的isselect
+          //我们希望只在现在可以跑的电梯里面找
+          this.calculateCallElevatorId()
+          this.insertToElevator();
+        }
+        else
+        {
+          alert("所有电梯都坏啦🆘");
+        }
       },
       callDownHelp(floor_id) {
-        this.pressFloor = floor_id - 1;
-        this.isUp = false;
-        this.calculateCallElevatorId()
-        this.insertToElevator();
+        if(this.isAllNotOk === false)
+        {
+          this.pressFloor = floor_id - 1;
+          this.isUp = false;
+          this.calculateCallElevatorId()
+          this.insertToElevator();
+        }
+        else
+        {
+          alert("所有电梯都坏啦🆘");
+        }
       },
     }
   }
